@@ -1,0 +1,98 @@
+.report-form-container {
+    width: 100%;
+    max-width: 800px;
+    /* margin: auto; */
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.report-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.input-box{
+    width: 150px;
+}
+
+
+
+
+/* .report-form h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    color: #333;
+} *
+/* .form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+} */
+
+/* .form-group input {
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+} */
+
+.export-btn {
+    height: 40px;
+    margin-left: 320px;
+    width: 90px;
+    margin-top: 8px;
+    background-color: #282855;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.export-btn:hover {
+    background-color: #adadaf;
+}
+
+
+/* .report-form label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    text-align: left;
+  } */
+
+/* .report-form input {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+  }
+   */
+/* .report-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .report-form button:hover {
+    background-color: #0056b3;
+  } */
