@@ -14,8 +14,9 @@ const Report1 = () => {
 
     return (
         <Layout>
+            <h2>Abandan Report</h2>
             <div className="report-form-container">
-            {/* <h2>Abandan Report</h2> */}
+            
                 <div className="report-form">
                     
 

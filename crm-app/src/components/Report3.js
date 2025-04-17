@@ -17,9 +17,9 @@ const Report3 = () => {
 
     return (
         <Layout>
+            <h2>OB CDR</h2>
             <div className="report-form-container">
                 <div className="report-form">
-                    {/* <h2>Generate Report</h2> */}
 
                     <div className="form-group">
                         <label>Client ID</label>
