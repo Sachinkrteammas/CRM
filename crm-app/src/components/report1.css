@@ -19,7 +19,7 @@
 }
 
 .input-box {
-    width: 100px;
+    width: 115px;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -36,15 +36,16 @@
 }
 
 .input-box-select {
-    width: 130px;
+    width: 145px;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 13px;
     text-align: center;
-    margin-left: 22px;
+    margin-left: 17px;
     margin-top: 4px;
 }
+
 
 .export-btn {
     height: 32px;

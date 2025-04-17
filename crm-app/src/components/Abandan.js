@@ -26,12 +26,12 @@ const Report1 = () => {
 
 
                     <div className="form-group">
-                        <label>Client ID</label>
+                        <label>Client Name</label>
                         <input
                             type="text"
                             value={clientId}
                             onChange={(e) => setClientId(e.target.value)}
-                            placeholder="Enter Client ID"
+                            placeholder="Enter Client Name"
                             className="input-box"
                         />
                     </div>
