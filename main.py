@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
 
+from starlette.middleware.cors import CORSMiddleware
+
 # Database setup code
 
 DATABASE_URL = "mysql+pymysql://root:dial%40mas123@172.12.10.22/db_dialdesk?charset=utf8mb4"
@@ -38,6 +40,14 @@ Base.metadata.create_all(bind=engine)
 
 # FastAPI app setup
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 
@@ -118,6 +128,4 @@ def login(user: LoginRequest):
     }
 
 ################################## End ########################################
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the FastAPI User Management System"}
+

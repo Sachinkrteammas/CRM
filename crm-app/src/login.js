@@ -10,16 +10,40 @@ const Login = ({ onLogin }) => {
   const [email_id, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Clear any previous error
 
-    // Allow any email/password to pass
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("username", email_id);
-    
-    onLogin();
-    navigate("/report", { replace: true }); // Redirect to report page
+    try {
+      const response = await fetch("http://localhost:8000/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email_id,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Login failed");
+      }
+
+      // Save login state to localStorage
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("email", data.email);
+
+      onLogin(); // Trigger login state update in parent
+      navigate("/report", { replace: true }); // Redirect
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -38,7 +62,9 @@ const Login = ({ onLogin }) => {
       <div className="login-section">
         <h1>Glad to see you back!</h1>
         <h4>Login to continue.</h4>
-        <p className="sub-text">Enter any email and password to continue.</p>
+        <p className="sub-text">Enter your email and password to continue.</p>
+
+        {error && <p className="error-message">{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -62,7 +88,7 @@ const Login = ({ onLogin }) => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter any password"
+                placeholder="Enter your password"
                 required
               />
               <span
@@ -73,9 +99,12 @@ const Login = ({ onLogin }) => {
               </span>
             </div>
           </div>
+
           <br />
 
-          <button type="submit" className="login-button">Login</button>
+          <button type="submit" className="login-button">
+            Login
+          </button>
         </form>
 
         <p>
