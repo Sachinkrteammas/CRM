@@ -87,7 +87,7 @@ form {
 }
 
 input {
-  width: 100%; /* Set input to full width of the form container */
+  width: 95%; /* Set input to full width of the form container */
   padding: 10px;
   margin-top: 5px;
   margin-bottom: 15px;
@@ -129,7 +129,11 @@ button {
     height: 100vh;
   }
 }
-
+.input-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
 .password-group {
   position: relative;
   display: flex;
@@ -165,4 +169,9 @@ button {
 input::-ms-reveal,
 input::-ms-clear {
   display: none;
+}
+
+
+.error-message {
+  color: #ff4d4f;
 }
