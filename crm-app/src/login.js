@@ -64,7 +64,7 @@ const Login = ({ onLogin }) => {
         <h4>Login to continue.</h4>
         <p className="sub-text">Enter your email and password to continue.</p>
 
-        {error && <p className="error-message">{error}</p>}
+        
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -101,10 +101,12 @@ const Login = ({ onLogin }) => {
           </div>
 
           <br />
+          
 
           <button type="submit" className="login-button">
             Login
           </button>
+          {error && <p className="error-message">{error}</p>}
         </form>
 
         <p>

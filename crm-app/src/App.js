@@ -8,11 +8,11 @@ import ForgotPassword from "./forgot";
 import VerifyPassword from "./verify";
 import VerifyOtpSignUp from "./VerifyOtpSignUp";
 import ReportPage from "./components/report";
-import Report1 from "./components/Report1";
-import Report2 from "./components/Report2";
-import Report3 from "./components/Report3";
-import Report4 from "./components/Report4";
-import Report5 from "./components/Report5";
+import Report1 from "./components/Abandan";
+import Report2 from "./components/IB";
+import Report3 from "./components/OB";
+import Report4 from "./components/SLA";
+import Report5 from "./components/Monthly";
 
 const ProtectedRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn ? element : <Navigate to="/" replace />;
@@ -85,11 +85,11 @@ const AppWrapper = () => {
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
-      <Route path="/report1" element={<Report1 />} />
-      <Route path="/report2" element={<Report2 />} />
-      <Route path="/report3" element={<Report3 />} />
-      <Route path="/report4" element={<Report4 />} />
-      <Route path="/report5" element={<Report5 />} />
+      <Route path="/Abandan" element={<Report1 />} />
+      <Route path="/IB" element={<Report2 />} />
+      <Route path="/OB" element={<Report3 />} />
+      <Route path="/SLA" element={<Report4 />} />
+      <Route path="/Monthly" element={<Report5 />} />
     </Routes>
   );
 };
