@@ -6,88 +6,88 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { BASE_URL } from "./config";
+import * as XLSX from "xlsx";
 
 const Report2 = () => {
   const [clientId, setClientId] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectId, setSelectId] = useState("");
+  const [tableData, setTableData] = useState([]);
+  const [ExcelData, setExcelData] = useState([]);
   const [showTable, setShowTable] = useState(false);
+  const [loading1, setLoading1] = useState(false);
 
-  const handleExport = () => {
-    alert(
-      `Exporting report for Client ID: ${clientId} from ${startDate} to ${endDate}`
-    );
+  const handleView = async () => {
+    if (!clientId || !startDate || !endDate) {
+      alert("Please select client, start date and end date");
+      return;
+    }
+
+    setLoading1(true);
+
+    const formattedStart = startDate.toISOString().split("T")[0];
+    const formattedEnd = endDate.toISOString().split("T")[0];
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/call_cdr_in/?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`
+      );
+      const result = await response.json();
+
+      setTableData(result.data);
+      setExcelData(result.data);
+
+      setShowTable(true);
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      alert("Failed to fetch data");
+
+    }
+    finally {
+      setLoading1(false);
+    }
   };
-
-  const handleView = () => {
-    setShowTable(true);
-  };
-
-  const tableData = [
-    {
-      id: 1,
-      name: "John Doe",
-      type: "HV",
-      duration: "10 mins",
-      date: "2025-04-15",
-      status: "Completed",
-      notes: "N/A",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      type: "LV",
-      duration: "8 mins",
-      date: "2025-04-14",
-      status: "Pending",
-      notes: "Follow-up needed",
-    },
-    {
-      id: 3,
-      name: "John Doe",
-      type: "HV",
-      duration: "10 mins",
-      date: "2025-04-15",
-      status: "Completed",
-      notes: "N/A",
-    },
-    {
-      id: 4,
-      name: "Jane Smith",
-      type: "LV",
-      duration: "8 mins",
-      date: "2025-04-14",
-      status: "Pending",
-      notes: "Follow-up needed",
-    },
-    // add more rows as needed
-  ];
 
   const [companyList, setCompanyList] = useState([]);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  axios
-    .get("http://127.0.0.1:8080/active_companies", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      setCompanyList(res.data);
-    })
-    .catch((err) => {
-      console.error("Failed to fetch companies", err);
-    });
-}, []);
+    axios
+      .get(`${BASE_URL}/active_companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setCompanyList(res.data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch companies", err);
+      });
+  }, []);
+
+  const downloadExcel = (dataExcel) => {
+    if (dataExcel.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
+
+    XLSX.writeFile(workbook, "cdr_ib_data.xlsx");
+  };
 
   return (
     <Layout>
+    <div className={`${loading1 ? "blurred" : ""}`}>
       <h4>IB CDR</h4>
       <div className="report-form-container">
         <div className="report-form">
+          {/* Client Dropdown */}
           <div className="form-group">
             <label>Client</label>
             <select
@@ -104,6 +104,7 @@ const Report2 = () => {
             </select>
           </div>
 
+          {/* Select Type (All, HV, LV, MV) */}
           <div className="form-group-select">
             <label>Select</label>
             <select
@@ -119,6 +120,7 @@ const Report2 = () => {
             </select>
           </div>
 
+          {/* Start Date */}
           <div className="form-group">
             <label>Start Date</label>
             <DatePicker
@@ -129,6 +131,7 @@ const Report2 = () => {
             />
           </div>
 
+          {/* End Date */}
           <div className="form-group">
             <label>End Date</label>
             <DatePicker
@@ -139,7 +142,11 @@ const Report2 = () => {
             />
           </div>
 
-          <button onClick={handleExport} className="export-btn">
+          {/* Action Buttons */}
+          <button
+            onClick={() => downloadExcel(ExcelData)}
+            className="export-btn"
+          >
             Export
           </button>
           <button onClick={handleView} className="view-btn">
@@ -149,34 +156,39 @@ const Report2 = () => {
       </div>
       {showTable && (
         <div className="report-table">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Duration</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.id}</td>
-                  <td>{row.name}</td>
-                  <td>{row.type}</td>
-                  <td>{row.duration}</td>
-                  <td>{row.date}</td>
-                  <td>{row.status}</td>
-                  <td>{row.notes}</td>
+          {showTable && tableData.length > 0 && (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  {Object.keys(tableData[0]).map((key) => (
+                    <th key={key}>{key}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {tableData.map((row, index) => (
+                  <tr key={index}>
+                    {Object.values(row).map((val, idx) => (
+                      <td key={idx}>{val !== null ? val.toString() : ""}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
+      {loading1 && (
+          <div className="loader-overlay">
+            <div className="bar"></div>
+            <div className="bar"></div>
+            <div className="bar"></div>
+            <div className="bar"></div>
+            <div className="bar"></div>
+          </div>
+        )}
+    </div>
+
     </Layout>
   );
 };

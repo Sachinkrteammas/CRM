@@ -7,6 +7,10 @@ import datetime
 import jwt
 from starlette.middleware.cors import CORSMiddleware
 
+
+
+from routers import call_cdr_in  # ✅ Fixed incorrect router name (was `call_summary`)
+
 # Secret key for JWT
 SECRET_KEY = "your-secret-key"
 
@@ -76,6 +80,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register router
+app.include_router(call_cdr_in.router, prefix="/api")  # ✅ Corrected router name
 
 # Pydantic models
 class UserCreate(BaseModel):
@@ -181,6 +187,7 @@ def decode_jwt(authorization: str):
 def get_active_companies(
         authorization: str = Header(None),  # Token received via Header
         db: Session = Depends(get_db1),
+        user_db: Session = Depends(get_db)
 ):
     print("Authorization token:", authorization)  # This should print the token if passed correctly
 
@@ -201,6 +208,10 @@ def get_active_companies(
     if not email:
         raise HTTPException(status_code=401, detail="Invalid token: Email not found")
 
+    db_user = user_db.query(TblUser).filter(TblUser.email == email).first()
+    if not db_user or db_user.token != token:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
     # Query to fetch active companies from the database
     query = text(""" 
         SELECT company_id, 
@@ -212,6 +223,9 @@ def get_active_companies(
     """)
     result = db.execute(query).fetchall()
     return [dict(row._mapping) for row in result]
+
+
+
 
 
 
