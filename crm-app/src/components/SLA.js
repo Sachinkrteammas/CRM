@@ -6,43 +6,99 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { BASE_URL } from "./config";
+import * as XLSX from "xlsx";
 
 const Report4 = () => {
   const [clientId, setClientId] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [selectId, setSelectId] = useState("");
-
-  const handleExport = () => {
-    alert(
-      `Exporting report for Client ID: ${clientId} from ${startDate} to ${endDate}`
-    );
-  };
-
+  const [tableData, setTableData] = useState([]);
+  const [excelData, setExcelData] = useState([]);
+  const [showTable, setShowTable] = useState(false);
+  const [loading1, setLoading1] = useState(false);
   const [companyList, setCompanyList] = useState([]);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    axios
+      .get(`${BASE_URL}/active_companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setCompanyList(res.data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch companies", err);
+      });
+  }, []);
 
-  axios
-    .get(`${BASE_URL}/active_companies`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      setCompanyList(res.data);
-    })
-    .catch((err) => {
-      console.error("Failed to fetch companies", err);
-    });
-}, []);
+  // ✅ Helper: Flatten nested API response
+  const flattenData = (nestedData) => {
+    const flattened = [];
+    for (const date in nestedData) {
+      for (const hour in nestedData[date]) {
+        flattened.push({
+          date,
+          hour,
+          ...nestedData[date][hour],
+        });
+      }
+    }
+    return flattened;
+  };
+
+  // ✅ View button click
+  const handleView = async () => {
+    if (!clientId || !startDate || !endDate) {
+      alert("Please select client, start date and end date");
+      return;
+    }
+
+    setLoading1(true);
+
+    const formattedStart = startDate.toISOString().split("T")[0];
+    const formattedEnd = endDate.toISOString().split("T")[0];
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/reportprint/?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`
+      );
+      const result = await response.json();
+
+      const flatData = flattenData(result.data);
+      setTableData(flatData);
+      setExcelData(flatData);
+      setShowTable(true);
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      alert("Failed to fetch data");
+    } finally {
+      setLoading1(false);
+    }
+  };
+
+  // ✅ Excel download
+  const downloadExcel = (dataExcel) => {
+    if (dataExcel.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
+    XLSX.writeFile(workbook, "cdr_ib_data.xlsx");
+  };
 
   return (
     <Layout>
       <h4>SLA</h4>
       <div className="report-form-container">
         <div className="report-form">
+          {/* Client Dropdown */}
           <div className="form-group">
             <label>Client</label>
             <select
@@ -59,16 +115,7 @@ const Report4 = () => {
             </select>
           </div>
 
-          {/* <div className="form-group">
-                        <label>Select</label>
-                        <input
-                            type="text"
-                            value={clientId}
-                            onChange={(e) => setClientId(e.target.value)}
-                            placeholder="Select"
-                            className="input-box"
-                        />
-                    </div> */}
+          {/* Select Type */}
           <div className="form-group-select">
             <label>Select</label>
             <select
@@ -84,34 +131,64 @@ const Report4 = () => {
             </select>
           </div>
 
+          {/* Start Date */}
           <div className="form-group">
             <label>Start Date</label>
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
               placeholderText="Start Date"
-              // dateFormat="dd/MM/yyyy"
               className="input-box"
             />
           </div>
 
+          {/* End Date */}
           <div className="form-group">
             <label>End Date</label>
             <DatePicker
               selected={endDate}
               onChange={(date) => setEndDate(date)}
               placeholderText="End Date"
-              // dateFormat="dd/MM/yyyy"
               className="input-box"
             />
           </div>
 
-          <button onClick={handleExport} className="export-btn">
+          {/* Buttons */}
+          <button
+            onClick={() => downloadExcel(excelData)}
+            className="export-btn"
+          >
             Export
           </button>
-          <button className="view-btn">View</button>
+          <button onClick={handleView} className="view-btn">
+            {loading1 ? "Loading..." : "View"}
+          </button>
         </div>
       </div>
+
+      {/* Table Section */}
+      {showTable && tableData.length > 0 && (
+        <div className="report-table">
+          <table className="data-table">
+            <thead>
+              <tr>
+                {Object.keys(tableData[0]).map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row, index) => (
+                <tr key={index}>
+                  {Object.values(row).map((val, idx) => (
+                    <td key={idx}>{val !== null ? val.toString() : ""}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </Layout>
   );
 };
