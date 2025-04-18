@@ -17,7 +17,7 @@ const Login = ({ onLogin }) => {
     setError(""); // Clear any previous error
 
     try {
-      const response = await fetch("http://localhost:8000/login/", {
+      const response = await fetch("http://localhost:8080/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,6 +38,9 @@ const Login = ({ onLogin }) => {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("user_id", data.user_id);
       localStorage.setItem("email", data.email);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
 
       onLogin(); // Trigger login state update in parent
       navigate("/report", { replace: true }); // Redirect
