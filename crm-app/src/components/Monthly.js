@@ -5,6 +5,7 @@ import "./report1.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
+import { BASE_URL } from "./config";
 
 const Report5 = () => {
   const [clientId, setClientId] = useState("");
@@ -24,7 +25,7 @@ const Report5 = () => {
   const token = localStorage.getItem("token");
 
   axios
-    .get("http://127.0.0.1:8080/active_companies", {
+    .get(`${BASE_URL}/active_companies`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

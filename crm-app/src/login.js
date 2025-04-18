@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import "./App.css";
 import myImage from "./assests/image.jpg";
 import logo from "./assests/logo.png";
+import { BASE_URL } from "./components/config";
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const Login = ({ onLogin }) => {
     setError(""); // Clear any previous error
 
     try {
-      const response = await fetch("http://localhost:8080/login/", {
+      const response = await fetch(`${BASE_URL}/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

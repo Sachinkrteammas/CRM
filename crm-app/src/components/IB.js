@@ -5,6 +5,7 @@ import "./report1.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
+import { BASE_URL } from "./config";
 
 const Report2 = () => {
   const [clientId, setClientId] = useState("");
