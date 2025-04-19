@@ -101,7 +101,7 @@ const Layout = ({ onLogout, children }) => {
       <div className="top-navbar">
         <img src={topLogo} alt="Company Logo" className="top-logo" />
         <div className="top-text">
-          <p>Title to be decided</p>
+          <p>Client Report Dashboard</p>
         </div>
         <div className="account">
           <img src={accountLogo} alt="loginname" className="account-logo" />

@@ -12,7 +12,8 @@
   overflow-y: auto; /* Enable scrolling */
   padding: 20px;
   /* background: #ffffff; */
-  height: calc(100vh - 60px);
+  height: 600px;
+  width: 95%;
 
 }
 
