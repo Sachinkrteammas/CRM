@@ -44,7 +44,7 @@ const Report5 = () => {
       <div className="report-form-container">
         <div className="report-form">
           <div className="form-group">
-            <label>Client</label>
+            <label>Client Name</label>
             <select
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}

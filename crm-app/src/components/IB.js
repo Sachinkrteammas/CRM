@@ -83,102 +83,108 @@ const Report2 = () => {
 
   return (
     <Layout>
-    <div className={`${loading1 ? "blurred" : ""}`}>
-      <h4>IB CDR</h4>
-      <div className="report-form-container">
-        <div className="report-form">
-          {/* Client Dropdown */}
-          <div className="form-group">
-            <label>Client</label>
-            <select
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className="input-box-select"
+      <div className={`${loading1 ? "blurred" : ""}`}>
+        <h4>IB CDR</h4>
+        <div className="report-form-container">
+          <div className="report-form">
+            {/* Client Dropdown */}
+            <div className="form-group">
+              <label>Client Name</label>
+              <select
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                className="input-box-select"
+              >
+                <option value="">Select Client</option>
+                {companyList.map((company) => (
+                  <option key={company.company_id} value={company.company_id}>
+                    {company.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Select Type (All, HV, LV, MV) */}
+            <div className="form-group-select">
+              <label>Select</label>
+              <select
+                value={selectId}
+                onChange={(e) => setSelectId(e.target.value)}
+                className="input-box-select"
+              >
+                <option value="">Select</option>
+                <option value="all">All</option>
+                <option value="hv">HV</option>
+                <option value="lv">LV</option>
+                <option value="mv">MV</option>
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div className="form-group">
+              <label>Start Date</label>
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                placeholderText="Start Date"
+                className="input-box"
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="form-group">
+              <label>End Date</label>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                placeholderText="End Date"
+                className="input-box"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <button
+              onClick={() => downloadExcel(ExcelData)}
+              className="export-btn"
             >
-              <option value="">Select Client</option>
-              {companyList.map((company) => (
-                <option key={company.company_id} value={company.company_id}>
-                  {company.label}
-                </option>
-              ))}
-            </select>
+              Export
+            </button>
+            <button onClick={handleView} className="view-btn">
+              View
+            </button>
           </div>
-
-          {/* Select Type (All, HV, LV, MV) */}
-          <div className="form-group-select">
-            <label>Select</label>
-            <select
-              value={selectId}
-              onChange={(e) => setSelectId(e.target.value)}
-              className="input-box-select"
-            >
-              <option value="">Select</option>
-              <option value="all">All</option>
-              <option value="hv">HV</option>
-              <option value="lv">LV</option>
-              <option value="mv">MV</option>
-            </select>
-          </div>
-
-          {/* Start Date */}
-          <div className="form-group">
-            <label>Start Date</label>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              placeholderText="Start Date"
-              className="input-box"
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="form-group">
-            <label>End Date</label>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              placeholderText="End Date"
-              className="input-box"
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <button
-            onClick={() => downloadExcel(ExcelData)}
-            className="export-btn"
-          >
-            Export
-          </button>
-          <button onClick={handleView} className="view-btn">
-            View
-          </button>
         </div>
-      </div>
-      {showTable && (
-        <div className="report-table">
-          {showTable && tableData.length > 0 && (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  {Object.keys(tableData[0]).map((key) => (
-                    <th key={key}>{key}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, index) => (
-                  <tr key={index}>
-                    {Object.values(row).map((val, idx) => (
-                      <td key={idx}>{val !== null ? val.toString() : ""}</td>
+        {showTable && (
+          <div className="report-table">
+            {showTable && tableData.length > 0 && (
+              <table className="data-table">
+                <thead style={{
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 2,
+                  textTransform: "capitalize"
+                }}>
+                  <tr>
+                    {Object.keys(tableData[0]).map((key) => (
+                      <th key={key}>{key}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-      {loading1 && (
+                </thead>
+                <tbody>
+                  {tableData.map((row, index) => (
+                    <tr key={index}>
+                      {Object.values(row).map((val, idx) => (
+                        <td key={idx}>{val !== null ? val.toString() : ""}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+        {loading1 && (
           <div className="loader-overlay">
             <div className="bar"></div>
             <div className="bar"></div>
@@ -187,7 +193,7 @@ const Report2 = () => {
             <div className="bar"></div>
           </div>
         )}
-    </div>
+      </div>
 
     </Layout>
   );
