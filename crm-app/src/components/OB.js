@@ -30,12 +30,18 @@ const Report3 = () => {
 
     const formattedStart = startDate.toISOString().split("T")[0];
     const formattedEnd = endDate.toISOString().split("T")[0];
+    const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/call_cdr_ob/?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`
-      );
-      const result = await response.json();
+      const response = await axios.get(
+  `${BASE_URL}/api/call_cdr_ob?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+      const result = response.data;
 
       setTableData(result.data);
       setExcelData(result.data);
@@ -51,27 +57,7 @@ const Report3 = () => {
     }
   };
 
-  //  const tableData = [
-  //    {
-  //      id: 1,
-  //      name: "John Doe",
-  //      type: "HV",
-  //      duration: "10 mins",
-  //      date: "2025-04-15",
-  //      status: "Completed",
-  //      notes: "N/A",
-  //    },
-  //    {
-  //      id: 2,
-  //      name: "Jane Smith",
-  //      type: "LV",
-  //      duration: "8 mins",
-  //      date: "2025-04-14",
-  //      status: "Pending",
-  //      notes: "Follow-up needed",
-  //    },
-  //    // add more rows as needed
-  //  ];
+
 
   const [companyList, setCompanyList] = useState([]);
 
@@ -92,17 +78,45 @@ const Report3 = () => {
       });
   }, []);
 
-  const downloadExcel = (dataExcel) => {
-    if (dataExcel.length === 0) {
-      alert("No data available to export.");
+  const downloadExcel = async () => {
+    if (!clientId || !startDate || !endDate) {
+      alert("Please select client, start date and end date");
       return;
     }
+    setLoading1(true);
 
-    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
+    const formattedStart = startDate.toISOString().split("T")[0];
+    const formattedEnd = endDate.toISOString().split("T")[0];
+    const token = localStorage.getItem('token');
 
-    XLSX.writeFile(workbook, "cdr_ib_data.xlsx");
+    try {
+      const response = await axios.get(
+  `${BASE_URL}/api/call_cdr_ob?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+      const result = response.data;
+
+      if (!result.data || result.data.length === 0) {
+        alert("No data available to export.");
+        return;
+      }
+
+      setExcelData(result.data);
+
+      const worksheet = XLSX.utils.json_to_sheet(result.data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
+      XLSX.writeFile(workbook, "cdr_ob_data.xlsx");
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      alert("Failed to fetch data");
+    } finally {
+      setLoading1(false);
+    }
   };
 
   return (
@@ -168,7 +182,7 @@ const Report3 = () => {
 
             {/* Action Buttons */}
             <button
-              onClick={() => downloadExcel(ExcelData)}
+              onClick={() => downloadExcel()}
               className="export-btn"
             >
               Export

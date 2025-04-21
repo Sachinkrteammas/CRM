@@ -61,12 +61,18 @@ const Report4 = () => {
 
     const formattedStart = startDate.toISOString().split("T")[0];
     const formattedEnd = endDate.toISOString().split("T")[0];
+    const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/reportprint/?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`
-      );
-      const result = await response.json();
+      const response = await axios.get(
+  `${BASE_URL}/api/reportprint?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+      const result = response.data;
 
       const flatData = flattenData(result.data);
       setTableData(flatData);
@@ -81,17 +87,63 @@ const Report4 = () => {
   };
 
   // ✅ Excel download
-  const downloadExcel = (dataExcel) => {
-    if (dataExcel.length === 0) {
+  const downloadExcel = async () => {
+  if (!clientId || !startDate || !endDate) {
+    alert("Please select client, start date and end date");
+    return;
+  }
+
+  setLoading1(true);
+
+  const formattedStart = startDate.toISOString().split("T")[0];
+  const formattedEnd = endDate.toISOString().split("T")[0];
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/api/reportprint?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const rawData = response.data;
+
+    if (!rawData.data || Object.keys(rawData.data).length === 0) {
       alert("No data available to export.");
       return;
     }
 
-    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+    // Flatten nested object to an array of { Date, Hour, ...metrics }
+    const formattedData = [];
+    for (const [date, hours] of Object.entries(rawData.data)) {
+      for (const [hour, metrics] of Object.entries(hours)) {
+        formattedData.push({
+          Date: date,
+          Hour: hour,
+          ...metrics,
+        });
+      }
+    }
+
+    setExcelData(formattedData);
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
-    XLSX.writeFile(workbook, "cdr_ib_data.xlsx");
-  };
+    XLSX.writeFile(workbook, "cdr_sla_data.xlsx");
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    alert("Failed to fetch data");
+  } finally {
+    setLoading1(false);
+  }
+};
+
+
+
 
   return (
     <Layout>
@@ -156,7 +208,7 @@ const Report4 = () => {
 
             {/* Buttons */}
             <button
-              onClick={() => downloadExcel(excelData)}
+              onClick={() => downloadExcel()}
               className="export-btn"
             >
               Export

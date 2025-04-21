@@ -29,11 +29,18 @@ const Report2 = () => {
     const formattedStart = startDate.toISOString().split("T")[0];
     const formattedEnd = endDate.toISOString().split("T")[0];
 
+    const token = localStorage.getItem('token');
+
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/call_cdr_in/?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`
-      );
-      const result = await response.json();
+      const response = await axios.get(
+  `${BASE_URL}/api/call_cdr_in?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+      const result = response.data;
 
       setTableData(result.data);
       setExcelData(result.data);
@@ -68,18 +75,49 @@ const Report2 = () => {
       });
   }, []);
 
-  const downloadExcel = (dataExcel) => {
-    if (dataExcel.length === 0) {
+  const downloadExcel = async () => {
+  if (!clientId || !startDate || !endDate) {
+    alert("Please select client, start date and end date");
+    return;
+  }
+  setLoading1(true);
+
+  const formattedStart = startDate.toISOString().split("T")[0];
+  const formattedEnd = endDate.toISOString().split("T")[0];
+  const token = localStorage.getItem('token');
+
+  try {
+    const response = await axios.get(
+  `${BASE_URL}/api/call_cdr_in?from_date=${formattedStart}&to_date=${formattedEnd}&clientId=${clientId}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+    const result = response.data;
+
+    if (!result.data || result.data.length === 0) {
       alert("No data available to export.");
       return;
     }
 
-    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+    setExcelData(result.data);
+
+
+    const worksheet = XLSX.utils.json_to_sheet(result.data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Call Data");
-
     XLSX.writeFile(workbook, "cdr_ib_data.xlsx");
-  };
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    alert("Failed to fetch data");
+  }
+  finally {
+    setLoading1(false);
+  }
+
+};
 
   return (
     <Layout>
@@ -144,7 +182,7 @@ const Report2 = () => {
 
             {/* Action Buttons */}
             <button
-              onClick={() => downloadExcel(ExcelData)}
+              onClick={() => downloadExcel()}
               className="export-btn"
             >
               Export

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Depends, Request
+from fastapi import APIRouter, Query, HTTPException, Depends, Request, Header
 from sqlalchemy import text, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Optional
@@ -39,13 +39,19 @@ def get_db1():
 
 @router.get("/call_cdr_in/")
 def get_call_cdr_in(
-        from_date: date,
-        to_date: date,
-        client_id: str = Query(..., alias="clientId"),
-        category_qry: Optional[str] = "",
-        db1: Session = Depends(get_db1),
-        db2: Session = Depends(get_db)
+    from_date: date,
+    to_date: date,
+    client_id: str = Query(..., alias="clientId"),
+    authorization: str = Header(None),
+    category_qry: Optional[str] = "",  # Optional query param
+    db1: Session = Depends(get_db1),
+    db2: Session = Depends(get_db)
 ):
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+
+    token = authorization.split(" ")[1]
     try:
         if client_id == "All":
             db2.execute(text("SET SESSION group_concat_max_len = 20000"))
@@ -131,10 +137,16 @@ def get_call_cdr_ob(
         from_date: date,
         to_date: date,
         client_id: str = Query(..., alias="clientId"),
+        authorization: str = Header(None),
         category_qry: Optional[str] = "",
         db1: Session = Depends(get_db1),
         db2: Session = Depends(get_db)
 ):
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+
+    token = authorization.split(" ")[1]
     try:
         if client_id == "All":
             db2.execute(text("SET SESSION group_concat_max_len = 20000"))
@@ -207,11 +219,17 @@ def report_print(
         from_date: date,
         to_date: date,
         client_id: str = Query(..., alias="clientId"),
+        authorization: str = Header(None),
         category_qry: Optional[str] = "",
         db1: Session = Depends(get_db1),
         db: Session = Depends(get_db)
 ):
     # If the client_id is "All", we select all clients
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+
+    token = authorization.split(" ")[1]
+
     if client_id == "All":
         campaign_ids_query = f"""
             SELECT GROUP_CONCAT(campaignid) AS campaign_id 
